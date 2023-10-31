@@ -18,11 +18,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::group(['middleware' => 'guest'], function () {
-    Route::get('login', [CustomAuthController::class, 'index'])->name('login');
-    Route::post('login', [CustomAuthController::class, 'login'])->name('login');
-    Route::get('registration', [CustomAuthController::class, 'registration']);
-    Route::post('register-user', [CustomAuthController::class, 'registerUser'])->name('register-user');
+Route::get('/index', function () {
+    return view('index');
 });
 
 Route::group(['middleware' => 'auth'], function () {
@@ -36,6 +33,14 @@ Route::group(['middleware' => 'auth'], function () {
     //For Password reset
     Route::get('dashboard/passwordreset', [CustomAuthController::class, 'showPasswordResetForm'])->name('dashboard.passwordreset');
     Route::post('dashboard/passwordreset', [CustomAuthController::class, 'resetPassword']);
+});
+
+
+Route::group(['middleware' => 'guest'], function () {
+    Route::get('login', [CustomAuthController::class, 'index'])->name('login');
+    Route::post('login', [CustomAuthController::class, 'login'])->name('login');
+    Route::get('registration', [CustomAuthController::class, 'registration']);
+    Route::post('register-user', [CustomAuthController::class, 'registerUser'])->name('register-user');
 });
 
 Route::get('/ulblist', [CustomAuthController::class, 'ulbList']);
