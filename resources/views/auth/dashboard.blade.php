@@ -26,7 +26,16 @@
                     <a class="nav-link" href="dashboard/ulbregistration">ULB Registration</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="dashboard/ulblist">ULB List</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="ulblogin">ULB Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard/uploaddocument">Upload Document</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard/verify">Verify Document</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="stateportalreg">State Portal Registration</a>

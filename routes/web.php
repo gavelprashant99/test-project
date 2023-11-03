@@ -18,9 +18,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/index', function () {
-    return view('index');
+Route::middleware(['web'])->group(function () {
+    Route::get('/index', function () {
+        return view('index');
+    });
 });
+
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('logout', [CustomAuthController::class, 'logout']);
@@ -30,9 +33,20 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('dashboard/ulbregistration', [CustomAuthController::class, 'ulbRegistration'])->name('dashboard.ulbregistration');
     Route::post('dashboard/register-ulb', [CustomAuthController::class, 'registerUlb'])->name('register-ulb');
 
+    //Upload documents
+    Route::get('dashboard/uploaddocument', [CustomAuthController::class, 'doocUploadForm']);
+    Route::post('dashboard/uploaddocument', [CustomAuthController::class, 'docUpload'])->name('upload-doc');
+
+    //For ULB list
+    Route::get('dashboard/ulblist', [CustomAuthController::class, 'ulbList']);
+
     //For Password reset
     Route::get('dashboard/passwordreset', [CustomAuthController::class, 'showPasswordResetForm'])->name('dashboard.passwordreset');
     Route::post('dashboard/passwordreset', [CustomAuthController::class, 'resetPassword']);
+
+    //for file verification
+        Route::get('dashboard/verify/{id}', [CustomAuthController::class, 'showVerificationForm']);
+        Route::post('dashboard/verify/{id}', [CustomAuthController::class, 'verifyDocument']);
 });
 
 
@@ -43,7 +57,7 @@ Route::group(['middleware' => 'guest'], function () {
     Route::post('register-user', [CustomAuthController::class, 'registerUser'])->name('register-user');
 });
 
-Route::get('/ulblist', [CustomAuthController::class, 'ulbList']);
+// Route::get('/ulblist', [CustomAuthController::class, 'ulbList']);
 Route::get('/ulblogin', [CustomAuthController::class, 'ulbLogin']);
 Route::get('/login-ulb', [CustomAuthController::class, 'loginUlb'])->name('login-ulb');
 Route::get('/stateportalreg', [CustomAuthController::class, 'stateportalreg']);

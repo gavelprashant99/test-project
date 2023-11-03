@@ -12,6 +12,8 @@ use App\Models\NagarNigam;
 use App\Models\SambhagData;
 use App\Models\NagarPalika;
 use App\Models\NagarPanchayat;
+use App\Models\UserDocument;
+use App\Models\VerificationLog;
 use Hash;
 use Session;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +22,7 @@ class CustomAuthController extends Controller
 {
     public function index()
     {
+        // Session::flush();
         return view('auth.login');
     }
     public function registration()
@@ -215,7 +218,7 @@ class CustomAuthController extends Controller
         $ulb->ulbcode = $request->ulbcode;
         $ulb->name = $request->name;
         $ulb->email = $request->email;
-        $ulb->password = md5($request->password);
+        $ulb->password = Hash::make($request->password);
         $ulb->mobile = $request->mobile;
         $ulb->ulbdivision = $request->ulbdivision;
         $res = $ulb->save();
@@ -227,7 +230,7 @@ class CustomAuthController extends Controller
     }
     public function ulbList()
     {
-        $ulblist = UlbRegistration::get();
+        $ulblist = UlbRegistration::paginate(10);
         return view('auth.ulblist', ['ulblist' => $ulblist]);
     }
     public function ulbLogin()
@@ -245,7 +248,7 @@ class CustomAuthController extends Controller
         $ulb = UlbRegistration::where('email', '=', $request->email)->first();
 
         if ($ulb) {
-            $hashedPassword = md5($request->password);
+            $hashedPassword = Hash::check($request->password);
 
             if ($hashedPassword === $ulb->password) {
                 $request->session()->put('loginId', $ulb->ulbcode);
@@ -385,31 +388,81 @@ class CustomAuthController extends Controller
 
     //For Reset Password
     public function showPasswordResetForm()
-{
-    return view('auth.PasswordReset');
-}
-
-public function resetPassword(Request $request)
-{
-    // Validate the request and identify the Admin using the provided email
-    $request->validate([
-        'admin_email' => 'required|email',
-        'new_password' => 'required',
-        'g-recaptcha-response' => 'required|recaptcha_v3:login,0.5'
-    ]);
-    $admin = User::where('email', $request->admin_email)->where('role_id',  1)->first();
-    // dd($request->admin_email); // Debug the email being used in the query
-    print($admin);
-    die();
-    if ($admin) {
-        // Set the new password
-        $admin->password = Hash::make($request->new_password);
-        $admin->save();
-        // Optionally, send an email to the Admin informing them of the password change
-        return redirect('dashboard/passwordreset')->with('success', 'Password changed successfully.');
-    } else {
-        return redirect('dashboard/passwordreset')->with('error', 'Admin not found.');
+    {
+        return view('auth.PasswordReset');
     }
-}
 
+    public function resetPassword(Request $request)
+    {
+        // Validate the request and identify the Admin using the provided email
+        $request->validate([
+            'admin_email' => 'required|email',
+            'new_password' => 'required',
+            'g-recaptcha-response' => 'required|recaptcha_v3:login,0.5',
+        ]);
+        $admin = User::where('email', $request->admin_email)
+            ->where('role_id', 1)
+            ->first();
+        // dd($request->admin_email); // Debug the email being used in the query
+        print $admin;
+        die();
+        if ($admin) {
+            // Set the new password
+            $admin->password = Hash::make($request->new_password);
+            $admin->save();
+            // Optionally, send an email to the Admin informing them of the password change
+            return redirect('dashboard/passwordreset')->with('success', 'Password changed successfully.');
+        } else {
+            return redirect('dashboard/passwordreset')->with('error', 'Admin not found.');
+        }
+    }
+
+    //upload document
+    public function doocUploadForm()
+    {
+        return view('auth.UploadDocument');
+    }
+
+    public function docUpload(Request $request)
+    {
+        $request->validate([
+            'document' => 'required|file|mimes:pdf,doc,docx|max:2048', // Adjust the rules as needed
+        ]);
+
+        if ($request->file('document')->isValid()) {
+        $document = new UserDocument();
+        $document->user_id = auth()->user()->id; // Assuming you have user authentication
+        $document->document_name = $request->file('document')->getClientOriginalName();
+        $document->document_path = $request->file('document')->store('documents'); // Store in the 'documents' directory
+
+        $document->save();
+        return back()->with('success', 'File uploaded successfully');
+        }
+        else{
+            return back()->with('fail', 'File upload failed');
+        }
+    }
+
+    public function showVerificationForm($id)
+{
+
+    $document = UserDocument::findOrFail($id);
+    return view('auth.Verify', ['document' => $document]);
+}
+public function verifyDocument(Request $request, $id)
+{
+    $document = UserDocument::findOrFail($id);
+    $status = $request->input('status');
+
+    $document->status = $status;
+    $document->save();
+
+    $verificationLog = new VerificationLog;
+    $verificationLog->document_id = $document->id;
+    $verificationLog->admin_id = auth()->user()->id; // Assuming you have an admin authentication
+    $verificationLog->status = $status;
+    $verificationLog->save();
+
+    return back()->with('success', 'Document verified successfully');
+}
 }
