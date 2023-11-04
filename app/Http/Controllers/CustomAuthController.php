@@ -430,39 +430,76 @@ class CustomAuthController extends Controller
         ]);
 
         if ($request->file('document')->isValid()) {
-        $document = new UserDocument();
-        $document->user_id = auth()->user()->id; // Assuming you have user authentication
-        $document->document_name = $request->file('document')->getClientOriginalName();
-        $document->document_path = $request->file('document')->store('documents'); // Store in the 'documents' directory
+            $document = new UserDocument();
+            $document->user_id = auth()->user()->id; // Assuming you have user authentication
+            $document->document_name = $request->file('document')->getClientOriginalName();
+            $document->document_path = $request->file('document')->store('public'); // Store in the 'documents' directory
 
-        $document->save();
-        return back()->with('success', 'File uploaded successfully');
-        }
-        else{
+            $document->save();
+            return back()->with('success', 'File uploaded successfully');
+        } else {
             return back()->with('fail', 'File upload failed');
         }
     }
 
     public function showVerificationForm($id)
+    {
+        $document = UserDocument::findOrFail($id);
+        return view('auth.Verify', ['document' => $document]);
+    }
+    public function verifyDocument(Request $request, $id)
+    {
+        $document = UserDocument::findOrFail($id);
+        $status = $request->input('status');
+
+        $document->status = $status;
+        $document->save();
+
+        $verificationLog = new VerificationLog();
+        $verificationLog->document_id = $document->id;
+        $verificationLog->admin_id = auth()->user()->id; // Assuming you have an admin authentication
+        $verificationLog->status = $status;
+        $verificationLog->save();
+
+        return back()->with('success', 'Document verified successfully');
+    }
+
+    public function getDoc()
+    {
+        $documents = UserDocument::where('user_id', auth()->id())->get();
+
+        return view('auth.ViewFiles', compact('documents'));
+    }
+    public function showDocumentModal($id)
+    {
+        $document = UserDocument::findOrFail($id);
+
+        return view('documents.modal', compact('document'));
+    }
+
+    public function show(Request $request, $id)
 {
+    $document = UserDocument::find(6);
+    
+    if ($document) {
 
-    $document = UserDocument::findOrFail($id);
-    return view('auth.Verify', ['document' => $document]);
+        
+        $documentPath = $document->document_path;
+        
+
+        // Generate the URL for the document
+        $documentUrl = asset("storage/$documentPath");
+
+        // Pass the document ID to the modal view
+        $documentId = $document->id;
+
+        // Open the modal with the document URL and ID
+        return view('auth.ViewFiles', compact('documentUrl', 'documentId'));
+    }
+
+    // Handle the case where the document is not found.
 }
-public function verifyDocument(Request $request, $id)
-{
-    $document = UserDocument::findOrFail($id);
-    $status = $request->input('status');
 
-    $document->status = $status;
-    $document->save();
-
-    $verificationLog = new VerificationLog;
-    $verificationLog->document_id = $document->id;
-    $verificationLog->admin_id = auth()->user()->id; // Assuming you have an admin authentication
-    $verificationLog->status = $status;
-    $verificationLog->save();
-
-    return back()->with('success', 'Document verified successfully');
-}
+    
+    
 }

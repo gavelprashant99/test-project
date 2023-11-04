@@ -37,6 +37,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('dashboard/uploaddocument', [CustomAuthController::class, 'doocUploadForm']);
     Route::post('dashboard/uploaddocument', [CustomAuthController::class, 'docUpload'])->name('upload-doc');
 
+    //View Documents
+    // Route::get('/dashboard/documents', [CustomAuthController::class, 'getDoc']);
+    Route::get('/dashboard/documents/modal/{id}',[CustomAuthController::class, 'showDocumentModal'])->name('documents.modal');
+    Route::post('/dashboard/documents/verify/{id}',[CustomAuthController::class, 'getDocuments']);
+    // routes/web.php
+Route::get('dashboard/user-document/{id}',[CustomAuthController::class, 'show'])->name('documents.show');
+
+
     //For ULB list
     Route::get('dashboard/ulblist', [CustomAuthController::class, 'ulbList']);
 
