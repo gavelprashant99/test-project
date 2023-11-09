@@ -33,8 +33,10 @@
 
                 <div class="modal-body">
                     <!-- You can display the document PDF content here -->
-                    <embed src="{{($documentUrl, $documentId) }}" type="application/pdf" width="100%"
-                        height="500">
+                    {{-- <embed src="{{($documentUrl, $documentId) }}" type="application/pdf" width="100%"
+                        height="500"> --}}
+                    <iframe src="{{ asset('storage/' . $documentPath) }}" style="width: 100%; height: 500px;"></iframe>
+
                     
                 </div>
             </div>

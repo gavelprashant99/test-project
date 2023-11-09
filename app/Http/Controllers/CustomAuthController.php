@@ -479,7 +479,7 @@ class CustomAuthController extends Controller
 
     public function show(Request $request, $id)
 {
-    $document = UserDocument::find(6);
+    $document = UserDocument::find(5);
     
     if ($document) {
 
@@ -489,12 +489,12 @@ class CustomAuthController extends Controller
 
         // Generate the URL for the document
         $documentUrl = asset("storage/$documentPath");
-
+        
         // Pass the document ID to the modal view
         $documentId = $document->id;
 
         // Open the modal with the document URL and ID
-        return view('auth.ViewFiles', compact('documentUrl', 'documentId'));
+        return view('auth.ViewFiles', compact('documentPath', 'documentId'));
     }
 
     // Handle the case where the document is not found.

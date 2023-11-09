@@ -42,7 +42,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard/documents/modal/{id}',[CustomAuthController::class, 'showDocumentModal'])->name('documents.modal');
     Route::post('/dashboard/documents/verify/{id}',[CustomAuthController::class, 'getDocuments']);
     // routes/web.php
-Route::get('dashboard/user-document/{id}',[CustomAuthController::class, 'show'])->name('documents.show');
+    Route::get('dashboard/user-document/{id}',[CustomAuthController::class, 'show'])->name('documents.show');
 
 
     //For ULB list
@@ -82,3 +82,6 @@ Route::get('/get-districts/{sambhagId}', [CustomAuthController::class, 'getDistr
 Route::get('/get-nagarnigam/{districtId}', [CustomAuthController::class, 'getNagarNigam']);
 Route::get('/get-nagarpalika/{districtId}', [CustomAuthController::class, 'getNagarPalika']);
 Route::get('/get-nagarpanchayat/{districtId}', [CustomAuthController::class, 'getNagarPanchayat']);
+
+//language change option
+Route::post('/change-language', 'LanguageController@changeLanguage')->middleware('web', 'set.language');;
